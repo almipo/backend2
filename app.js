@@ -6,8 +6,8 @@ const userRoutes = require('./routes/userRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
 const connectDB = require('./config/db');
-require('dotenv').config();
 const sessionRoutes = require('./routes/sessionRoutes');  
+require('dotenv').config();
 
 const app = express();
 
@@ -26,4 +26,3 @@ const port = 3000;
 app.listen(port, () => {
    console.log(`Servidor corriendo en puerto ${port}`);
 });
-//VxOlk5AISmF1SFk2 alanpozzi
