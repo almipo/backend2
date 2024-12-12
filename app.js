@@ -1,28 +1,29 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const passport = require('./config/passport');
-const authRoutes = require('./routes/auth');
+const passport = require('passport');
+const userRoutes = require('./routes/userRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const ticketRoutes = require('./routes/ticketRoutes');
+const connectDB = require('./config/db');
+require('dotenv').config();
+const sessionRoutes = require('./routes/sessionRoutes');  
 
 const app = express();
-const PORT = 3000; 
 
-// Middleware
 app.use(express.json());
 app.use(cookieParser());
-
-// Passport initialization
 app.use(passport.initialize());
 
-// Rutas
-app.use('/api/auth', authRoutes); 
-
-// Conexión a MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/mi_base_de_datos')
-   .then(() => console.log("Conectado a MongoDB"))
-   .catch((error) => console.error("Error al conectar a MongoDB:", error));
+app.use('/api/users', userRoutes);
+app.use('/api/carts', cartRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/sessions', sessionRoutes);
+connectDB();
 
 // Iniciar el servidor
-app.listen(PORT, () => {
-   console.log(`Servidor corriendo en http://localhost:${PORT}`);
+const port = 3000;
+app.listen(port, () => {
+   console.log(`Servidor corriendo en puerto ${port}`);
 });
+//VxOlk5AISmF1SFk2 alanpozzi

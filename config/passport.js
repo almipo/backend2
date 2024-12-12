@@ -1,35 +1,44 @@
+// config/passport.js
+
 const passport = require('passport');
-const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
-const User = require('../model/User.js'); 
+const LocalStrategy = require('passport-local').Strategy;
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const User = require('../models/user.model');
 
+// Configuración de la estrategia Local (para login)
+passport.use(new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'password',
+}, async (email, password, done) => {
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return done(null, false, { message: 'User not found' });
+        }
 
-const cookieExtractor = (req) => {
-    let token = null;
-    if (req && req.cookies) {
-       token = req.cookies['token']; 
+        if (!user.comparePassword(password)) {
+            return done(null, false, { message: 'Incorrect password' });
+        }
+
+        return done(null, user);
+    } catch (error) {
+        return done(error);
     }
-    return token;
- };
+}));
 
-// Configuración de opciones de JWT
-const options = {
-   jwtFromRequest: cookieExtractor, 
-   secretOrKey: '1234', 
-};
-
-//  obtener al usuario desde el token
-passport.use(
-    new JwtStrategy(options, async (jwt_payload, done) => {
-       try {
-          const user = await User.findById(jwt_payload.id);
-          if (user) {
-             return done(null, user);
-          }
-          return done(null, false);
-       } catch (error) {
-          return done(error, false);
-       }
-    })
- );
-
-module.exports = passport;
+// Configuración de la estrategia JWT (para obtener el usuario logueado)
+passport.use(new JwtStrategy({
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: 'secretkey', // La misma clave utilizada en la generación de JWT
+}, async (jwt_payload, done) => {
+    try {
+        const user = await User.findById(jwt_payload.id);
+        if (!user) {
+            return done(null, false);
+        }
+        return done(null, user);
+    } catch (error) {
+        return done(error);
+    }
+}));
